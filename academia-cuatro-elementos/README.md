@@ -1,114 +1,68 @@
-# React + TypeScript + Vite
+# Academia de los Cuatro Reinos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web del juego educativo (React + Vite + TypeScript + Tailwind).
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 20+
+- pnpm 10+
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
-
-## Integración de `work` con `main` para despliegue
-
-Para mostrar claramente que los cambios de la rama de trabajo quedaron listos para desplegarse en `main`, usa este flujo:
+## Desarrollo local
 
 ```bash
-# 1) Actualizar referencias
-git fetch --all --prune
-
-# 2) Revisar estado de ambas ramas
-git checkout work
-git status
-git log --oneline --decorate -n 5
-
-git checkout main
-git status
-git log --oneline --decorate -n 5
-
-# 3) Integrar cambios de work en main (fast-forward o merge)
-git merge --no-ff work
-
-# 4) Validar build y lint antes de despliegue
-npm run lint
-npm run build
-
-# 5) Publicar rama main al remoto
-git push origin main
+pnpm install
+pnpm dev
 ```
 
-Si `main` no existe localmente, créala desde remoto con:
+## Build de producción
 
 ```bash
-git checkout -b main origin/main
+pnpm build
+pnpm preview
 ```
 
-Si no hay remoto configurado (como en este entorno local), la integración puede verificarse localmente con `git log --graph --oneline --decorate` y realizar el push en el entorno con acceso al repositorio remoto.
+## Deploy en Vercel
 
-## Verificación rápida: `SublevelConfig` con `name`
+Este repositorio tiene una sola app en `academia-cuatro-elementos/`.
+Config recomendada en Vercel:
 
-Si aparece el error de TypeScript `Property 'name' does not exist on type 'SublevelConfig'`, valida que **ambos** archivos `LevelScreen.tsx` tengan `name: string` dentro de la interfaz `SublevelConfig`:
+- **Root Directory:** `academia-cuatro-elementos`
+- **Install Command:** `pnpm install --no-frozen-lockfile`
+- **Build Command:** `pnpm run build`
+- **Output Directory:** `dist`
 
-- `src/screens/LevelScreen.tsx`
-- `academia-cuatro-reinos/src/screens/LevelScreen.tsx`
+También está versionado en `vercel.json`.
 
-Comandos útiles para comprobarlo:
+## Solución para error `404: Project not found` en Vercel
+
+Ese error normalmente significa que el proyecto local quedó vinculado a un `projectId` viejo o a otro equipo.
+
+Ejecuta estos pasos desde la carpeta de la app (`academia-cuatro-elementos`):
 
 ```bash
-rg -n "interface SublevelConfig|name: string" src/screens/LevelScreen.tsx academia-cuatro-reinos/src/screens/LevelScreen.tsx
+# 1) entrar en la app
+cd academia-cuatro-elementos
+
+# 2) limpiar vínculo local viejo
+rm -rf .vercel
+
+# 3) iniciar sesión y volver a enlazar
+pnpm dlx vercel login
+pnpm dlx vercel link
+
+# 4) traer variables/config remota (opcional pero recomendado)
+pnpm dlx vercel pull --yes --environment=production
+
+# 5) validar build local
+pnpm install
+pnpm build
+
+# 6) desplegar
+pnpm dlx vercel --prod --yes
 ```
 
-En PowerShell (sin `rg`):
+Si usas GitHub + Vercel Dashboard, verifica además:
 
-```powershell
-Select-String -Path src/screens/LevelScreen.tsx, academia-cuatro-reinos/src/screens/LevelScreen.tsx -Pattern "interface SublevelConfig|name: string"
-```
-
-Después valida compilación en ambos proyectos:
-
-```powershell
-pnpm run build
-Set-Location .\academia-cuatro-reinos
-pnpm run build
-Set-Location ..
-```
+1. Que el repositorio conectado sea `gabrielaloraperez-spec/academiacuatroelementos4`.
+2. Que el **Root Directory** apunte a `academia-cuatro-elementos`.
+3. Que el proyecto pertenezca al equipo/cuenta donde estás autenticado.
